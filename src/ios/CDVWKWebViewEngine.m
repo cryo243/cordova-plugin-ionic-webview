@@ -108,7 +108,12 @@
 // see forwardingTargetForSelector: selector comment for the reason for this pragma
 #pragma clang diagnostic ignored "-Wprotocol"
 static NSDictionary  *serverStartOptions = nil;
-
+ serverStartOptions = @{
+                               GCDWebServerOption_Port: @(8080),
+                               GCDWebServerOption_BindToLocalhost: @(YES),
+                               GCDWebServerOption_ServerName: @"Ionic",
+                               GCDWebServerOption_AutomaticallySuspendInBackground:@(NO)
+                               };
 @implementation CDVWKWebViewEngine
 
 @synthesize engineWebView = _engineWebView;
@@ -117,12 +122,6 @@ static NSDictionary  *serverStartOptions = nil;
 {
     self = [super init];
     if (self) {
-        serverStartOptions = @{
-                               GCDWebServerOption_Port: @(8080),
-                               GCDWebServerOption_BindToLocalhost: @(YES),
-                               GCDWebServerOption_ServerName: @"Ionic",
-                               GCDWebServerOption_AutomaticallySuspendInBackground:@(NO)
-                               };
         if (NSClassFromString(@"WKWebView") == nil) {
             return nil;
         }
@@ -269,12 +268,6 @@ static NSDictionary  *serverStartOptions = nil;
 
 - (void)onReset
 {
-    if (!self.webServer.running) {
-        [self.webServer stop];
-        [self.webServer startWithOptions:serverStartOptions error:nil];
-    }
-    
-    
     [self addURLObserver];
 }
 
