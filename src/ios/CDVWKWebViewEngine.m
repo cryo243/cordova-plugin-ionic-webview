@@ -102,21 +102,25 @@
 @property (nonatomic, weak) id <WKScriptMessageHandler> weakScriptMessageHandler;
 @property (nonatomic, strong) GCDWebServer *webServer;
 @property (nonatomic, readwrite) CGRect frame;
-
+@property (nonatomic, readwrite) NSDictionary  *serverStartOptions;
 @end
 
 // see forwardingTargetForSelector: selector comment for the reason for this pragma
 #pragma clang diagnostic ignored "-Wprotocol"
-static NSDictionary  *serverStartOptions = nil;
- serverStartOptions = @{
-                               GCDWebServerOption_Port: @(8080),
-                               GCDWebServerOption_BindToLocalhost: @(YES),
-                               GCDWebServerOption_ServerName: @"Ionic",
-                               GCDWebServerOption_AutomaticallySuspendInBackground:@(NO)
-                               };
+
 @implementation CDVWKWebViewEngine
 
 @synthesize engineWebView = _engineWebView;
+@synthesize serverStartOptions = _serverStartOptions;
+
+- (NSDictionary *)serverStartOptions {
+    return  @{
+                           GCDWebServerOption_Port: @(8080),
+                           GCDWebServerOption_BindToLocalhost: @(YES),
+                           GCDWebServerOption_ServerName: @"Ionic",
+                           GCDWebServerOption_AutomaticallySuspendInBackground:@(NO)
+                           };
+}
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -132,7 +136,7 @@ static NSDictionary  *serverStartOptions = nil;
         [GCDWebServer setLogLevel: kGCDWebServerLoggingLevel_Warning];
         self.webServer = [[GCDWebServer alloc] init];
         [self.webServer addGETHandlerForBasePath:@"/" directoryPath:@"/" indexFilename:nil cacheAge:3600 allowRangeRequests:YES];
-        [self.webServer startWithOptions:serverStartOptions error:nil];
+        [self.webServer startWithOptions:self.serverStartOptions error:nil];
     }
 
     return self;
@@ -298,7 +302,7 @@ static void * KVOContext = &KVOContext;
         NSLog(@"But Web server was killed");
         [self.webServer stop];   //Just to kill everything
         [self.webServer addGETHandlerForBasePath:@"/" directoryPath:@"/" indexFilename:nil cacheAge:3600 allowRangeRequests:YES]; //I am not sure if this is important though
-        [self.webServer startWithOptions:serverStartOptions error:nil];
+        [self.webServer startWithOptions:self.serverStartOptions error:nil];
     }
     if ([self shouldReloadWebView]) {
         NSLog(@"%@", @"CDVWKWebViewEngine reloading!");
