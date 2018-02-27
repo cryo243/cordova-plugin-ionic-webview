@@ -297,9 +297,8 @@ static void * KVOContext = &KVOContext;
     NSLog(@"Web server received notification to enter foreground");
     if (![self canLoadRequest:[NSURLRequest requestWithURL:_webServer.serverURL]]){
         NSLog(@"But Web server was killed");
-        [self.webServer stop];   //Just to kill everything
-        [self.webServer addGETHandlerForBasePath:@"/" directoryPath:@"/" indexFilename:nil cacheAge:3600 allowRangeRequests:YES]; //I am not sure if this is important though
-        [self.webServer startWithOptions:self.serverStartOptions error:nil];
+        NSLog(@"Web server url %@", _webServer.serverURL);
+        NSLog(@"Web server is running %u", _webServer.serverURL);
     }
     if ([self shouldReloadWebView]) {
         NSLog(@"%@", @"CDVWKWebViewEngine reloading!");
@@ -358,7 +357,7 @@ static void * KVOContext = &KVOContext;
 
 - (BOOL)canLoadRequest:(NSURLRequest *)request
 {
-    return TRUE;
+    return _webServer.running;
 }
 
 - (void)updateSettings:(NSDictionary*)settings
