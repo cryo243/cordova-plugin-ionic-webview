@@ -102,7 +102,7 @@
 @property (nonatomic, weak) id <WKScriptMessageHandler> weakScriptMessageHandler;
 @property (nonatomic, strong) GCDWebServer *webServer;
 @property (nonatomic, readwrite) CGRect frame;
-@property (nonatomic, readwrite) NSDictionary  *serverStartOptions;
+
 @end
 
 // see forwardingTargetForSelector: selector comment for the reason for this pragma
@@ -111,16 +111,6 @@
 @implementation CDVWKWebViewEngine
 
 @synthesize engineWebView = _engineWebView;
-@synthesize serverStartOptions = _serverStartOptions;
-
-- (NSDictionary *)serverStartOptions {
-    return  @{
-                           GCDWebServerOption_Port: @(8080),
-                           GCDWebServerOption_BindToLocalhost: @(YES),
-                           GCDWebServerOption_ServerName: @"Ionic",
-                           GCDWebServerOption_AutomaticallySuspendInBackground:@(NO)
-                           };
-}
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -136,7 +126,13 @@
         [GCDWebServer setLogLevel: kGCDWebServerLoggingLevel_Warning];
         self.webServer = [[GCDWebServer alloc] init];
         [self.webServer addGETHandlerForBasePath:@"/" directoryPath:@"/" indexFilename:nil cacheAge:3600 allowRangeRequests:YES];
-        [self.webServer startWithOptions:self.serverStartOptions error:nil];
+        NSDictionary *options = @{
+                                  GCDWebServerOption_Port: @(8080),
+                                  GCDWebServerOption_BindToLocalhost: @(YES),
+                                  GCDWebServerOption_ServerName: @"Ionic",
+                                   GCDWebServerOption_AutomaticallySuspendInBackground:@(NO)
+                                  };
+        [self.webServer startWithOptions:options error:nil];
     }
 
     return self;
@@ -295,7 +291,8 @@ static void * KVOContext = &KVOContext;
 
 - (void)onAppWillEnterForeground:(NSNotification *)notification {
     NSLog(@"Web server received notification to enter foreground");
-    if (![self canLoadRequest:[NSURLRequest requestWithURL:_webServer.serverURL]]){
+
+    if (!_webServer.running){
         NSLog(@"But Web server was killed");
         NSLog(@"Web server url %@", _webServer.serverURL);
         NSLog(@"Web server is running %u", _webServer.serverURL);
@@ -357,7 +354,7 @@ static void * KVOContext = &KVOContext;
 
 - (BOOL)canLoadRequest:(NSURLRequest *)request
 {
-    return _webServer.running;
+    return TRUE;
 }
 
 - (void)updateSettings:(NSDictionary*)settings
